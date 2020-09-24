@@ -37,4 +37,5 @@ N@N and M@N are defined as follows:
 
 ## 3. Usage
 A. For BPR, CML, MLP, NeuMF, simply run "main.py"
+
 B. For CDAE, simply run "main_AE.py"
