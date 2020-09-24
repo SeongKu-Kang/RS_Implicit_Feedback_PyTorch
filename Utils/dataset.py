@@ -28,7 +28,6 @@ class implicit_CF_dataset(data.Dataset):
             total train interactions, each instance has a form of (user, item, 1)
         num_ns : int
             num. negative samples
-        is_train : bool
         """
         super(implicit_CF_dataset, self).__init__()
         
@@ -37,7 +36,6 @@ class implicit_CF_dataset(data.Dataset):
         self.rating_mat = rating_mat
         self.num_ns = num_ns
         self.interactions = interactions
-        self.is_train = is_train
         
 
     def negative_sampling(self):
