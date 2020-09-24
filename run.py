@@ -83,7 +83,6 @@ def LOO_run_AE(opt, model, gpu, optimizer, train_loader, test_dataset, model_sav
 	for epoch in range(max_epoch):
 		
 		tic1 = time.time()
-		train_loader.dataset.negative_sampling()
 		epoch_loss = []
 		
 		for batch_user, batch_user_R in train_loader:
@@ -95,7 +94,7 @@ def LOO_run_AE(opt, model, gpu, optimizer, train_loader, test_dataset, model_sav
 			# Forward Pass
 			model.train()
 			output = model(batch_user, batch_user_R)
-			batch_loss = model.get_loss(output)
+			batch_loss = model.get_loss(output, batch_user_R)
 			epoch_loss.append(batch_loss)
 			
 			# Backward and optimize

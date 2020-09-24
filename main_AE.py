@@ -1,6 +1,6 @@
 import argparse
 
-from Models.AutoRec import AutoRec
+from Models.CDAE import CDAE
 
 from Utils.dataset import implicit_CF_dataset_AE, implicit_CF_dataset_AE_test
 from Utils.data_utils import read_LOO_settings
@@ -31,9 +31,10 @@ def run():
 	train_loader = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 	# model
-	if opt.model == 'AutoRec':
+	if opt.model == 'CDAE':
 		hidden_dim = opt.hidden_dim
-		model = AutoRec(user_count, item_count, hidden_dim, gpu)
+		noise_level = opt.noise_level
+		model = CDAE(user_count, item_count, hidden_dim, noise_level, num_ns, gpu)
 
 	else:
 		assert False
@@ -57,14 +58,15 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 
 	# model
-	parser.add_argument('--model', type=str, default='AutoRec')
+	parser.add_argument('--model', type=str, default='CDAE')
 	parser.add_argument('--hidden_dim', type=int, default=60, help='bottleneck layer dimensions')
+	parser.add_argument('--noise_level', type=float, default=0.2, help='for denoising AE')
 
 	# training
-	parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
+	parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
 	parser.add_argument('--reg', type=float, default=0.0001, help='for L2 regularization')
 	parser.add_argument('--batch_size', type=int, default=512)
-	parser.add_argument('--num_ns', type=int, default=1, help='number of negative samples')
+	parser.add_argument('--num_ns', type=int, default=5, help='number of negative samples')
 
 	parser.add_argument('--gpu', type=int, default=0, help='0,1,2,3')
 

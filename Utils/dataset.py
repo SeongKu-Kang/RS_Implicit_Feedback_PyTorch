@@ -198,7 +198,7 @@ class implicit_CF_dataset_test(data.Dataset):
 class implicit_CF_dataset_AE_test(implicit_CF_dataset_test):
     def __init__(self, user_count, item_count, rating_mat, test_sample, valid_sample, candidates, batch_size=128):
 
-        implicit_CF_dataset_test.__init__(user_count, test_sample, valid_sample, candidates, batch_size)
+        implicit_CF_dataset_test.__init__(self, user_count, test_sample, valid_sample, candidates, batch_size)
         
         self.user_count = user_count
         self.item_count = item_count
@@ -217,7 +217,8 @@ class implicit_CF_dataset_AE_test(implicit_CF_dataset_test):
         -------
         self.user_list[batch_start: batch_end] : 1-D LongTensor
             next batch of users
-        
+        self.R[batch_start: batch_end] : 2-D FloatTensor
+            rating matrix of batch users
         is_last_batch : bool
         """
         batch_start = self.batch_start

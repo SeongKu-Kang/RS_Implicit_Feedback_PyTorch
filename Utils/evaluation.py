@@ -339,9 +339,9 @@ def evaluation(model, gpu, eval_dict, epoch, test_dataset):
 		elif (model.sim_type == 'inner product') or (model.sim_type == 'L2 dist'):
 			eval_results = LOO_latent_factor_evaluate(model, test_dataset)
 
-		# AutoRec
+		# CDAE
 		elif model.sim_type == 'AE':
-			eval_results = LOO_AE_evaluate(model, test_dataset)
+			eval_results = LOO_AE_evaluate(model, gpu, test_dataset)
 
 		else:
 			assert 'Unknown sim_type'	
