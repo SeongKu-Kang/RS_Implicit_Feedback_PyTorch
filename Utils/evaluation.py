@@ -196,6 +196,8 @@ def LOO_Net_evaluate(model, gpu, test_dataset):
 
 		batch_score_mat = model.forward_multi_items(batch_users, batch_total_items)
 
+		model()
+
 		batch_score_mat = to_np(-batch_score_mat)
 		batch_total_items = to_np(batch_total_items)
 
@@ -204,6 +206,74 @@ def LOO_Net_evaluate(model, gpu, test_dataset):
 			
 			total_items = batch_total_items[idx]
 			score = batch_score_mat[idx]
+
+			result = np.argsort(score).flatten().tolist()
+			ranking_list = np.array(total_items)[result]
+
+			for mode in ['test', 'valid']:
+				if mode == 'test':
+					target_item = total_items[0]
+					ranking_list_tmp = np.delete(ranking_list, np.where(ranking_list == total_items[1]))
+				else:
+					target_item = total_items[1]
+					ranking_list_tmp = np.delete(ranking_list, np.where(ranking_list == total_items[0]))
+				
+				for topk in [5, 10, 20]:
+					(h, n, m) = LOO_check(ranking_list_tmp, target_item, topk)
+					eval_results[mode]['H' + str(topk)].append(h)
+					eval_results[mode]['N' + str(topk)].append(n)
+					eval_results[mode]['M' + str(topk)].append(m)
+
+		if is_last_batch: break
+
+
+	# valid, test
+	for mode in ['test', 'valid']:
+		for topk in [5, 10, 20]:
+			eval_results[mode]['H' + str(topk)] = round(np.asarray(eval_results[mode]['H' + str(topk)]).mean(), 4)
+			eval_results[mode]['N' + str(topk)] = round(np.asarray(eval_results[mode]['N' + str(topk)]).mean(), 4)
+			eval_results[mode]['M' + str(topk)] = round(np.asarray(eval_results[mode]['M' + str(topk)]).mean(), 4)	
+
+	return eval_results
+
+
+
+def LOO_AE_evaluate(model, gpu, test_dataset):
+	"""Leave-one-out evaluation for deep model
+
+	Parameters
+	----------
+	model : Pytorch Model
+	gpu : if available
+	test_dataset : Pytorch Dataset
+
+	Returns
+	-------
+	eval_results : dict
+		summarizes the evaluation results
+	"""
+	metrics = {'H10':[], 'M10':[], 'N10':[], 'H20':[], 'M20':[], 'N20':[], 'H5':[], 'M5':[], 'N5':[]}
+	eval_results = {'test': copy.deepcopy(metrics), 'valid':copy.deepcopy(metrics)}
+
+	# for each batch
+	while True:
+		batch_users, batch_users_R, is_last_batch = test_dataset.get_next_batch_users()
+
+		batch_test_items, batch_valid_items, batch_candidates = test_dataset.get_next_batch(batch_users)
+		batch_total_items = torch.cat([batch_test_items, batch_valid_items, batch_candidates], -1)
+
+		batch_users = batch_users.to(gpu)
+		batch_users_R = batch_users_R.to(gpu)
+		batch_score_mat = model(batch_users, batch_users_R)
+
+		batch_score_mat = to_np(-batch_score_mat)
+		batch_total_items = to_np(batch_total_items)
+
+		# for each test user in a mini-batch
+		for idx, test_user in enumerate(batch_users):
+			
+			total_items = batch_total_items[idx]
+			score = batch_score_mat[idx][total_items]
 
 			result = np.argsort(score).flatten().tolist()
 			ranking_list = np.array(total_items)[result]
@@ -268,6 +338,10 @@ def evaluation(model, gpu, eval_dict, epoch, test_dataset):
 		# BPR, CML
 		elif (model.sim_type == 'inner product') or (model.sim_type == 'L2 dist'):
 			eval_results = LOO_latent_factor_evaluate(model, test_dataset)
+
+		# AutoRec
+		elif model.sim_type == 'AE':
+			eval_results = LOO_AE_evaluate(model, test_dataset)
 
 		else:
 			assert 'Unknown sim_type'	

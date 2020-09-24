@@ -1,19 +1,15 @@
 import argparse
 
+from Models.AutoRec import AutoRec
 
-from Models.BPR import BPR
-from Models.CML import CML
-from Models.MLP import MLP
-from Models.NeuMF import NeuMF
-
-from Utils.dataset import implicit_CF_dataset, implicit_CF_dataset_test
+from Utils.dataset import implicit_CF_dataset_AE, implicit_CF_dataset_AE_test
 from Utils.data_utils import read_LOO_settings
 
 import torch
 import torch.utils.data as data
 import torch.optim as optim
 
-from run import LOO_run
+from run import LOO_run_AE
 
 def run():
 
@@ -29,30 +25,15 @@ def run():
 	data_path, dataset, LOO_seed = opt.data_path, opt.dataset, opt.LOO_seed
 	user_count, item_count, train_mat, train_interactions, valid_sample, test_sample, candidates = read_LOO_settings(data_path, dataset, LOO_seed)
 
-	train_dataset = implicit_CF_dataset(user_count, item_count, train_mat, train_interactions, num_ns)
-	test_dataset = implicit_CF_dataset_test(user_count, test_sample, valid_sample, candidates)
+	train_dataset = implicit_CF_dataset_AE(user_count, item_count, train_mat)
+	test_dataset = implicit_CF_dataset_AE_test(user_count, item_count, train_mat, test_sample, valid_sample, candidates, batch_size)
 
 	train_loader = data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 	# model
-	if opt.model == 'BPR':
-		dim = opt.dim
-		model = BPR(user_count, item_count, dim, gpu)
-
-	elif opt.model == 'CML':
-		dim = opt.dim
-		margin = opt.margin
-		model = CML(user_count, item_count, dim, margin, gpu)
-
-	elif opt.model == 'NeuMF':
-		dim = opt.dim
-		num_hidden_layer = opt.num_hidden_layer
-		model = NeuMF(user_count, item_count, dim, num_hidden_layer, gpu)
-
-	elif opt.model == 'MLP':
-		dim = opt.dim
-		num_hidden_layer = opt.num_hidden_layer
-		model = MLP(user_count, item_count, dim, num_hidden_layer, gpu)
+	if opt.model == 'AutoRec':
+		hidden_dim = opt.hidden_dim
+		model = AutoRec(user_count, item_count, hidden_dim, gpu)
 
 	else:
 		assert False
@@ -69,17 +50,15 @@ def run():
 		model_save_path = './Saved_models/' + opt.dataset +"/" + str(opt.model) +"_" + str(opt.lr) + "_" + str(opt.dim) + "_" + str(opt.reg) +'.model' + "_" + str(opt.LOO_seed)
 	
 	# start train
-	LOO_run(opt, model, gpu, optimizer, train_loader, test_dataset, model_save_path)
+	LOO_run_AE(opt, model, gpu, optimizer, train_loader, test_dataset, model_save_path)
 
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 
 	# model
-	parser.add_argument('--model', type=str, default='BPR')
-	parser.add_argument('--dim', type=int, default=60, help='embedding dimensions')
-	parser.add_argument('--margin', type=float, default=1.0, help='for metric learning-based models')
-	parser.add_argument('--num_hidden_layer', type=int, default=1, help='for deep models')
+	parser.add_argument('--model', type=str, default='AutoRec')
+	parser.add_argument('--hidden_dim', type=int, default=60, help='bottleneck layer dimensions')
 
 	# training
 	parser.add_argument('--lr', type=float, default=0.001, help='learning rate')

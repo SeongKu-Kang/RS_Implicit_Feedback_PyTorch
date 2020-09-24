@@ -7,10 +7,14 @@ import numpy as np
 
 from Utils.data_utils import *
 
+#################################################################################################################
+# For training
+#################################################################################################################
+
 # Dataset for implicit feedback
 class implicit_CF_dataset(data.Dataset):
 
-    def __init__(self, user_count, item_count, rating_mat, interactions, num_ns, is_train):
+    def __init__(self, user_count, item_count, rating_mat, interactions, num_ns):
         """
         Parameters
         ----------
@@ -60,15 +64,37 @@ class implicit_CF_dataset(data.Dataset):
     
 
     def __len__(self):
-        if self.is_train:
-            return len(self.interactions) * self.num_ns
-        else:
-            return len(self.interactions)
+        return len(self.interactions) * self.num_ns
         
 
     def __getitem__(self, idx):
         return self.train_arr[idx][0], self.train_arr[idx][1], self.train_arr[idx][2]
 
+
+class implicit_CF_dataset_AE(data.Dataset):
+    def __init__(self, user_count, item_count, rating_mat):
+        super(implicit_CF_dataset_AE, self).__init__()
+        
+        self.user_count = user_count
+        self.item_count = item_count
+        
+        self.R = torch.zeros((user_count, item_count))
+        for user in rating_mat:
+            items = list(rating_mat[user].keys())
+            self.R[user][items] = 1.
+        
+
+    def __len__(self):
+        return self.user_count
+        
+
+    def __getitem__(self, idx):
+        return idx, self.R[idx]
+
+
+#################################################################################################################
+# For test
+#################################################################################################################
 
 class implicit_CF_dataset_test(data.Dataset):
     """
@@ -166,3 +192,44 @@ class implicit_CF_dataset_test(data.Dataset):
         batch_candidates = torch.index_select(self.candidates, 0, batch_user)
 
         return batch_test_items, batch_valid_items, batch_candidates
+
+  
+
+class implicit_CF_dataset_AE_test(implicit_CF_dataset_test):
+    def __init__(self, user_count, item_count, rating_mat, test_sample, valid_sample, candidates, batch_size=128):
+
+        implicit_CF_dataset_test.__init__(user_count, test_sample, valid_sample, candidates, batch_size)
+        
+        self.user_count = user_count
+        self.item_count = item_count
+        self.batch_size = batch_size
+        
+        self.R = torch.zeros((user_count, item_count))
+        for user in rating_mat:
+            items = list(rating_mat[user].keys())
+            self.R[user][items] = 1.
+        
+
+    def get_next_batch_users(self):
+        """get the next batch of test sers
+
+        Returns
+        -------
+        self.user_list[batch_start: batch_end] : 1-D LongTensor
+            next batch of users
+        
+        is_last_batch : bool
+        """
+        batch_start = self.batch_start
+        batch_end = self.batch_start + self.batch_size
+
+        # if it is the last batch
+        if batch_end >= len(self.user_list):
+            batch_end = len(self.user_list)
+            self.batch_start = 0
+            is_last_batch = True
+        else:
+            self.batch_start += self.batch_size
+            is_last_batch = False
+
+        return self.user_list[batch_start: batch_end], self.R[batch_start: batch_end], is_last_batch
