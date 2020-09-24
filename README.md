@@ -1,8 +1,8 @@
-# RS_Implicit_Feedback_PyTorch
+# RS for Implicit Feedback in PyTorch
 PyTorch implementations of collaborative filtering methods with implicit feedback
 
 
-## 1. Implemened Methods
+## 1. Implemented Methods
 The implemented methods are as follows:
 1. BPR, BPR: Bayesian Personalized Ranking from Implicit Feedback, UAI'09
 2. CML, Collaborative Metric Learning, WWW'17
@@ -22,12 +22,12 @@ The protocol is as follows:
 ### 2.2. Metrics
 We provide three ranking metrics broadly adopted in many recent papers:  HR@N, NDCG@N, MRR@N.
 The hit ratio simply measures whether the test item is present in the top-$N$ list, which is defined as follows:
-$$
-\text{H} @ N = \frac { 1 } { | \mathcal { U }_{test} | } \sum _ { u \in \mathcal { U} _{test} } \delta \left( p _ { u } \leq \text { top } N \right),    
-$$
+
+
+![Large](https://latex.codecogs.com/svg.latex?\text{H}%20@%20N%20=%20\frac%20{%201%20}%20{%20|%20\mathcal%20{%20U%20}_{test}%20|%20}%20\sum%20_%20{%20u%20\in%20\mathcal%20{%20U}%20_{test}%20}%20\delta%20\left(%20p%20_%20{%20u%20}%20\leq%20\text%20{%20top%20}%20N%20\right) )
+
 where $\delta ( \cdot )$ is the indicator function, $\mathcal { U }_{test}$ is the set of the test users, $p_u$ is the hit ranking position of the test item for the user $u$. 
 On the other hand, the normalized discounted cumulative gain and the mean reciprocal rank are ranking position-aware metrics that put higher scores to the hits at upper ranks.
 N@N and M@N are defined as follows:
-$$
-\text{N} @ N = \frac { 1 } { | \mathcal { U } _{test} | } \sum _ { u \in \mathcal { U }_{test} } \frac { \log 2 } { \log \left( p _ { u } + 1 \right) }\text{, M} @ N = \frac { 1 } { | \mathcal { U }_{test} | } \sum _ { u \in \mathcal { U } _{test} } \frac { 1 } { p _ { u } }    
-$$
+
+![Large](https://latex.codecogs.com/svg.latex?\text{N}%20@%20N%20=%20\frac%20{%201%20}%20{%20|%20\mathcal%20{%20U%20}%20_{test}%20|%20}%20\sum%20_%20{%20u%20\in%20\mathcal%20{%20U%20}_{test}%20}%20\frac%20{%20\log%202%20}%20{%20\log%20\left(%20p%20_%20{%20u%20}%20+%201%20\right)%20}\text{,%20M}%20@%20N%20=%20\frac%20{%201%20}%20{%20|%20\mathcal%20{%20U%20}_{test}%20|%20}%20\sum%20_%20{%20u%20\in%20\mathcal%20{%20U%20}%20_{test}%20}%20\frac%20{%201%20}%20{%20p%20_%20{%20u%20}%20})
