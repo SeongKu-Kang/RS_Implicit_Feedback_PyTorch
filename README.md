@@ -8,6 +8,7 @@ The implemented methods are as follows:
 2. CML, Collaborative Metric Learning, WWW'17
 3. MLP, Neural Collaborative Filtering, WWW'17
 4. NeuMF, Neural Collaborative Filtering, WWW'17
+5. CDAE, Collaborative Denoising Auto-Encoders for Top-N Recommender Systems, WSDM'16
 
 ## 2. Evaluation
 ### 2.1. Leave-One-Out (LOO) protocol
