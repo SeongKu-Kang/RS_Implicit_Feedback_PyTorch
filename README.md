@@ -33,3 +33,8 @@ On the other hand, the normalized discounted cumulative gain and the mean recipr
 N@N and M@N are defined as follows:
 
 ![Large](https://latex.codecogs.com/svg.latex?\text{N}%20@%20N%20=%20\frac%20{%201%20}%20{%20|%20\mathcal%20{%20U%20}%20_{test}%20|%20}%20\sum%20_%20{%20u%20\in%20\mathcal%20{%20U%20}_{test}%20}%20\frac%20{%20\log%202%20}%20{%20\log%20\left(%20p%20_%20{%20u%20}%20+%201%20\right)%20}\text{,%20M}%20@%20N%20=%20\frac%20{%201%20}%20{%20|%20\mathcal%20{%20U%20}_{test}%20|%20}%20\sum%20_%20{%20u%20\in%20\mathcal%20{%20U%20}%20_{test}%20}%20\frac%20{%201%20}%20{%20p%20_%20{%20u%20}%20})
+
+
+## 3. Usage
+A. For BPR, CML, MLP, NeuMF, simply run "main.py"
+B. For CDAE, simply run "main_AE.py"
